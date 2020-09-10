@@ -59,17 +59,16 @@ void MainWindow::changeMapView(int zoom)
      count =0;
 
 
-     for(int i=pow(tilesamount,2)-1;i>=0;--i){
-         delete vecTiles[i];
-         vecTiles.pop_back();
 
+     for(auto &el:vecTiles){
+         delete el;
      }
-     for(int i=pow(tilesamount,2)-1;i>=0;--i){
-         delete tiles[i];
-         tiles.pop_back();
+     vecTiles.clear();
 
+     for(auto &el:tiles){
+         delete el;
      }
-
+        tiles.clear();
      tilesamount=pow(2,zoom);
      SceneX=-(tilesamount*size-800)/2;
      SceneY=-(tilesamount*size-800)/2;
@@ -97,7 +96,7 @@ void MainWindow::changeMapView(int zoom)
         }
      }
 */
-
+    issetted=true;
 }
 
 void MainWindow::cool_changeMapView(int zoom)
@@ -133,6 +132,16 @@ void MainWindow::cool_changeMapView(int zoom)
      }
 }
 
+bool MainWindow::intersected(QPointF firstTopLeft, QPointF firstBottomRight, QPointF secondTopLeft, QPointF secondBottomRight)
+{
+    if(firstTopLeft.x()>=secondBottomRight.x()||secondTopLeft.x()>=firstBottomRight.x())
+        return false;
+
+    if(firstTopLeft.y()>=secondBottomRight.y()||secondTopLeft.y()>=firstBottomRight.y())
+        return false;
+    return true;
+}
+
 void MainWindow::loadImage(int number,int x,int y)
 {
 
@@ -155,12 +164,16 @@ void MainWindow::showCenter()
 
     //label->setText(QString::number(ui->graphicsView->mapToScene(ui->graphicsView->viewport()->rect().topLeft()).x())+" "+ui->graphicsView->mapToScene(ui->graphicsView->viewport()->rect().topLeft()).y());
    ui->textEdit->setText(QString::number(ui->graphicsView->mapToScene(ui->graphicsView->viewport()->rect().topLeft()).x())+" "+QString::number(ui->graphicsView->mapToScene(ui->graphicsView->viewport()->rect().topLeft()).y()));
-    if(count<=pow(tilesamount,2)){
+    if(issetted){
 
         for(int i=0;i<tilesamount;++i){
             for(int j=0;j<tilesamount;++j){
-                if(ui->graphicsView->viewport()->rect().intersects(QRect(SceneX+i*size,SceneY+j*size,400,400)))
-                {
+                QRect rect(ui->graphicsView->viewport()->rect().topLeft(),ui->graphicsView->viewport()->rect().bottomRight());
+                QPointF firstTopLeft(ui->graphicsView->mapToScene(ui->graphicsView->viewport()->rect().topLeft()));
+                 QPointF firstBottomRight(ui->graphicsView->mapToScene(ui->graphicsView->viewport()->rect().bottomRight()));
+                //if(rect.intersects(QRect(SceneX+i*size,SceneY+j*size,400,400)))
+                if(intersected(firstTopLeft,firstBottomRight,QPointF(SceneX+i*size,SceneY+j*size),QPointF(SceneX+i*size+400,SceneY+j*size+400)))
+                 {
 
                     if(!bool_tiles[i][j]){
                     qDebug()<<"The center of View in Scene"<<ui->graphicsView->mapToScene(ui->graphicsView->viewport()->rect().topLeft())<<" And count: "<<count<<endl;
@@ -187,6 +200,7 @@ void MainWindow::showCenter()
 void MainWindow::on_pushButton_clicked()
 {
     if(this->zoom<19){
+    issetted=false;
     this->zoom++;
     this->changeMapView(this->zoom);
     }
@@ -196,7 +210,7 @@ void MainWindow::on_pushButton_clicked()
 void MainWindow::on_pushButton_2_clicked()
 {
     if(this->zoom>1){
-
+    issetted=false;
     this->zoom--;
     this->changeMapView(this->zoom);
     }

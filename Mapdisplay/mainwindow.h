@@ -21,6 +21,8 @@
 #include<QVector>
 #include<QPushButton>
 #include<QTimer>
+#include<QtMath>
+#include<QSslSocket>
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -56,7 +58,8 @@ private:
     QTimer* centerChanged;
     int count;
     QVector<QVector<bool>>bool_tiles;
-
+    bool intersected(QPointF firstTopLeft,QPointF firstBottomRight,QPointF secondTopLeft,QPointF secondBottomRight);
+    bool issetted=true;
 signals:
     void zoomChanged(int value);
 
