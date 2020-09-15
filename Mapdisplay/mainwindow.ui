@@ -57,11 +57,17 @@
    <widget class="QPushButton" name="pushButton">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>0</y>
+      <x>70</x>
+      <y>70</y>
       <width>141</width>
       <height>41</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Segoe MDL2 Assets</family>
+      <pointsize>14</pointsize>
+     </font>
     </property>
     <property name="text">
      <string>Zoom+</string>
@@ -70,11 +76,19 @@
    <widget class="QPushButton" name="pushButton_2">
     <property name="geometry">
      <rect>
-      <x>180</x>
-      <y>0</y>
+      <x>230</x>
+      <y>70</y>
       <width>141</width>
       <height>41</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Segoe MDL2 Assets</family>
+      <pointsize>14</pointsize>
+      <weight>50</weight>
+      <bold>false</bold>
+     </font>
     </property>
     <property name="text">
      <string>Zoom-</string>
@@ -83,11 +97,24 @@
    <widget class="QTextEdit" name="textEdit">
     <property name="geometry">
      <rect>
-      <x>350</x>
+      <x>50</x>
       <y>0</y>
       <width>461</width>
       <height>41</height>
      </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_3">
+    <property name="geometry">
+     <rect>
+      <x>530</x>
+      <y>10</y>
+      <width>241</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>PushButton</string>
     </property>
    </widget>
   </widget>
@@ -100,8 +127,27 @@
      <height>21</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menu_API">
+    <property name="title">
+     <string>&amp;API</string>
+    </property>
+    <addaction name="actionOpen_Streen_Map"/>
+    <addaction name="separator"/>
+    <addaction name="actionYandex_Map"/>
+   </widget>
+   <addaction name="menu_API"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionOpen_Streen_Map">
+   <property name="text">
+    <string>Open Streen Map</string>
+   </property>
+  </action>
+  <action name="actionYandex_Map">
+   <property name="text">
+    <string>Yandex Map</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>

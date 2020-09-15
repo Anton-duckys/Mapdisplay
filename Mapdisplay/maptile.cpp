@@ -7,5 +7,5 @@ MapTile::MapTile(QPixmap pixmap, QGraphicsItem *parent)
 
 MapTile::~MapTile()
 {
-    qDebug()<<"Tile is deleted"<<endl;
+   // qDebug()<<"Tile is deleted"<<endl;
 }

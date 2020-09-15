@@ -12,6 +12,8 @@ class MapTile:public QObject, public QGraphicsPixmapItem
 public:
     MapTile(QPixmap pixmap, QGraphicsItem*parent=0);
     ~MapTile();
+
+
 };
 
 #endif // MAPTILE_H

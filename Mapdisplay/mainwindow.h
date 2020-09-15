@@ -22,6 +22,7 @@
 #include<QPushButton>
 #include<QTimer>
 #include<QtMath>
+#include<QTransform>
 #include<QSslSocket>
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -45,8 +46,7 @@ private:
     int Request;
     QImage*image;
     FileDownloader*m_pImgCtrl;
-    QVector<FileDownloader*> vecTiles;
-    QVector<MapTile*>tiles;
+    QList<MapTile*>tiles;
     int tilesamount;
     int size;
     int zoom;
@@ -54,12 +54,33 @@ private:
     QPushButton *decreaseZoom;
     QPushButton *increaseZoom;
     void changeMapView(int zoom);
-    void cool_changeMapView(int zoom);
     QTimer* centerChanged;
+    QTimer* updateTimer;
     int count;
     QVector<QVector<bool>>bool_tiles;
     bool intersected(QPointF firstTopLeft,QPointF firstBottomRight,QPointF secondTopLeft,QPointF secondBottomRight);
     bool issetted=true;
+    int sceneSize;
+    QString api ="https://tile.openstreetmap.org/";
+    QUrl urlpai;
+    double remain(double number, double divider);
+
+
+    QPointF sceneTopLeft;
+    QPointF sceneBottomRight;
+    QVector<QVector<bool>> check_tiles;
+    qreal longitude (int x,int z);
+    qreal latitude(int y,int z);
+    int tileX(qreal lon,int z);
+    int tileY(qreal lat,int z);
+
+
+
+    void removeNonVisibleTiles();
+
+
+
+
 signals:
     void zoomChanged(int value);
 
@@ -68,5 +89,9 @@ private slots:
  void showCenter();
  void on_pushButton_clicked();
  void on_pushButton_2_clicked();
+ void on_actionOpen_Streen_Map_triggered();
+ void on_actionYandex_Map_triggered();
+
+ void on_pushButton_3_clicked();
 };
 #endif // MAINWINDOW_H
