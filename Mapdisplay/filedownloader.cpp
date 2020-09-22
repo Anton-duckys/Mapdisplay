@@ -1,6 +1,6 @@
 #include "filedownloader.h"
 
-FileDownloader::FileDownloader(QUrl imageUrl,int number,int x,int y, QObject *parent) :
+FileDownloader::FileDownloader(QUrl imageUrl,int x,int y, QObject *parent) :
  QObject(parent)
 {
     this->number=number;
@@ -26,7 +26,7 @@ void FileDownloader::fileDownloaded(QNetworkReply* pReply) {
  m_DownloadedData = pReply->readAll();
  //emit a signal
  pReply->deleteLater();
- emit downloaded(this->number,this->x,this->y);
+ emit downloaded(this->x,this->y);
 }
 
 QByteArray FileDownloader::downloadedData() const {

@@ -14,16 +14,20 @@
 #include <QBuffer>
 #include <QNetworkRequest>
 #include <QNetworkReply>
-#include "filedownloader.h"
 #include<QGraphicsScene>
 #include<QGraphicsView>
-#include "maptile.h"
 #include<QVector>
 #include<QPushButton>
 #include<QTimer>
 #include<QtMath>
 #include<QTransform>
 #include<QSslSocket>
+#include<QScrollBar>
+#include<QLayout>
+#include<mapscene.h>
+
+#include "maptile.h"
+#include "filedownloader.h"
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -39,44 +43,39 @@ public:
 private:
     Ui::MainWindow *ui;
     QLabel *label;
-    QGraphicsScene *scene;
-    QBuffer *buffer;
+    MapScene *scene;
+    MapView*graphicsView;
     MapTile *tile;
     QNetworkAccessManager* nam;
-    int Request;
     QImage*image;
-    FileDownloader*m_pImgCtrl;
-    QList<MapTile*>tiles;
+    QList< MapTile*>tiles;
+    QList<MapTile*>temp_tiles;
     int tilesamount;
     int size;
     int zoom;
+    bool load_tem;
+    int tilesInView;
     double SceneX,SceneY;
-    QPushButton *decreaseZoom;
-    QPushButton *increaseZoom;
-    void changeMapView(int zoom);
-    QTimer* centerChanged;
-    QTimer* updateTimer;
-    int count;
-    QVector<QVector<bool>>bool_tiles;
-    bool intersected(QPointF firstTopLeft,QPointF firstBottomRight,QPointF secondTopLeft,QPointF secondBottomRight);
+    QTimer* centerChanged; 
     bool issetted=true;
     int sceneSize;
-    QString api ="https://tile.openstreetmap.org/";
-    QUrl urlpai;
-    double remain(double number, double divider);
-
-
-    QPointF sceneTopLeft;
-    QPointF sceneBottomRight;
+    QString api ="https://tile2.maps.2gis.com/";
+    QUrl urlpai; 
     QVector<QVector<bool>> check_tiles;
-    qreal longitude (int x,int z);
-    qreal latitude(int y,int z);
-    int tileX(qreal lon,int z);
-    int tileY(qreal lat,int z);
 
+    double longitude (int x,int z, double picX);
+    double latitude(int y,int z,double picY);
 
+    double TwoGis_longitude (int x,int z, double picX);
+    double TwoGis_latitude(int y,int z,double picY);
 
+    int tileX(double lon,int z);
+    int tileY(double lat,int z);
+
+    bool intersected(QPointF firstTopLeft,QPointF firstBottomRight,QPointF secondTopLeft,QPointF secondBottomRight);
+    void changeMapView(int zoom,QString zoomtype,QPointF viewTopCenter);
     void removeNonVisibleTiles();
+    double remain(double number, double divider);
 
 
 
@@ -85,13 +84,15 @@ signals:
     void zoomChanged(int value);
 
 private slots:
- void loadImage(int number,int x,int y);
+ void loadImage(int x,int y);
  void showCenter();
  void on_pushButton_clicked();
  void on_pushButton_2_clicked();
  void on_actionOpen_Streen_Map_triggered();
  void on_actionYandex_Map_triggered();
-
- void on_pushButton_3_clicked();
+ void increaseZoomByDoubleClick(QPointF clickPoint);
+ void changeZoomByWheel(bool zoom, QPointF wheelPoint);
+ void slotTargetCoordinate(QPointF target);
+ void on_action2Gis_triggered();
 };
 #endif // MAINWINDOW_H

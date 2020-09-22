@@ -12,14 +12,14 @@ SOURCES += \
     filedownloader.cpp \
     main.cpp \
     mainwindow.cpp \
-    maptile.cpp \
-    myqgraphicsview.cpp
+    mapscene.cpp \
+    maptile.cpp
 
 HEADERS += \
     filedownloader.h \
     mainwindow.h \
-    maptile.h \
-    myqgraphicsview.h
+    mapscene.h \
+    maptile.h
 
 FORMS += \
     mainwindow.ui

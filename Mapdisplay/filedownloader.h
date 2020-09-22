@@ -13,13 +13,13 @@ class FileDownloader : public QObject
 {
  Q_OBJECT
  public:
-  explicit FileDownloader(QUrl imageUrl,int number=0,int x=0,int y=0, QObject *parent = 0);
+  explicit FileDownloader(QUrl imageUrl,int x=0,int y=0, QObject *parent = 0);
   virtual ~FileDownloader();
   QByteArray downloadedData() const;
   int x,y,number;
 
- signals:
-  void downloaded(int number,int x,int y);
+  signals:
+  void downloaded(int x,int y);
 
  private slots:
   void fileDownloaded(QNetworkReply* pReply);
