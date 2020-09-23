@@ -17,6 +17,12 @@ void MapScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
     emit signalTargetCoordinate(event->scenePos());
 }
 
+void MapScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
+{
+    emit showPopUp(event->scenePos());
+    Q_UNUSED(event);
+}
+
 
 
 

@@ -24,8 +24,9 @@
 #include<QSslSocket>
 #include<QScrollBar>
 #include<QLayout>
+#include<QMessageBox>
 #include<mapscene.h>
-
+#include"popup.h"
 #include "maptile.h"
 #include "filedownloader.h"
 QT_BEGIN_NAMESPACE
@@ -69,15 +70,18 @@ private:
     double TwoGis_longitude (int x,int z, double picX);
     double TwoGis_latitude(int y,int z,double picY);
 
-    int tileX(double lon,int z);
-    int tileY(double lat,int z);
+    std::pair<int,double> tileX(double lon,int z);
+    std::pair<int,double> tileY(double lat,int z);
+
+     std::pair<int,double> TwoGis_tileX(double lon,int z);
+      std::pair<int,double> TwoGis_tileY(double lat,int z);
 
     bool intersected(QPointF firstTopLeft,QPointF firstBottomRight,QPointF secondTopLeft,QPointF secondBottomRight);
     void changeMapView(int zoom,QString zoomtype,QPointF viewTopCenter);
     void removeNonVisibleTiles();
     double remain(double number, double divider);
 
-
+    PopUp *popUp;
 
 
 signals:
@@ -94,5 +98,6 @@ private slots:
  void changeZoomByWheel(bool zoom, QPointF wheelPoint);
  void slotTargetCoordinate(QPointF target);
  void on_action2Gis_triggered();
+ void showPopUp(QPointF clickPoint);
 };
 #endif // MAINWINDOW_H

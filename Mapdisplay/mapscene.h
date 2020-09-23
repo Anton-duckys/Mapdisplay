@@ -15,6 +15,7 @@ public:
     MapScene(QObject*parent=nullptr);
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event);
     void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
+   void mousePressEvent(QGraphicsSceneMouseEvent *event) ;
 
 
 
@@ -22,6 +23,7 @@ signals:
 
     void increaseZoom(QPointF clickPoint);
     void signalTargetCoordinate(QPointF point);
+     void showPopUp(QPointF click);
 
 
 };
@@ -39,6 +41,7 @@ protected:
 signals:
      void increaseZoom(QPointF clickPoint);
     void changeZoomWheel(bool zoom,QPointF wheelPoint);
+
 };
 
 #endif // MAPSCENE_H
