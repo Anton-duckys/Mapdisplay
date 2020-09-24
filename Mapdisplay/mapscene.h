@@ -8,6 +8,8 @@
 #include<QGraphicsSceneMouseEvent>
 #include<QGraphicsSceneWheelEvent>
 #include<QDebug>
+#include<QApplication>
+#include<QDragMoveEvent>
 class MapScene:public QGraphicsScene
 {
     Q_OBJECT
@@ -34,7 +36,8 @@ class MapView:public QGraphicsView
     Q_OBJECT
 public:
     MapView(QWidget*parent=nullptr);
-     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event);
+     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) ;
+
 
 protected:
     void wheelEvent(QWheelEvent*event);

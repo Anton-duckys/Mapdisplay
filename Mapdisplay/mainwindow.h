@@ -25,6 +25,11 @@
 #include<QScrollBar>
 #include<QLayout>
 #include<QMessageBox>
+#include<QtWebEngineWidgets>
+#include<QtWebView>
+#include<QtWebViewDepends>
+#include<QWebEnginePage>
+
 #include<mapscene.h>
 #include"popup.h"
 #include "maptile.h"
@@ -63,7 +68,7 @@ private:
     QString api ="https://tile2.maps.2gis.com/";
     QUrl urlpai; 
     QVector<QVector<bool>> check_tiles;
-
+    QHBoxLayout*layout;
     double longitude (int x,int z, double picX);
     double latitude(int y,int z,double picY);
 
@@ -80,8 +85,11 @@ private:
     void changeMapView(int zoom,QString zoomtype,QPointF viewTopCenter);
     void removeNonVisibleTiles();
     double remain(double number, double divider);
-
+    QWebEngineView *webView;
     PopUp *popUp;
+
+
+     bool eventFilter(QObject *watched, QEvent *event) override;
 
 
 signals:
@@ -99,5 +107,9 @@ private slots:
  void slotTargetCoordinate(QPointF target);
  void on_action2Gis_triggered();
  void showPopUp(QPointF clickPoint);
+
+ void slotEnter();       // Слот для обработки нажатия клавиши Enter
+    void slotLinkClicked(QUrl url); // Слот для клика по ссылке на странице
+
 };
 #endif // MAINWINDOW_H

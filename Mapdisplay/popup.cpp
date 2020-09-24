@@ -82,11 +82,21 @@ void PopUp::show()
                100);*/
     //setFixedHeight(100);
     setFixedSize(width(),height());
-    setGeometry(QCursor::pos().x(),QCursor::pos().y(),width(),height());
+    if(QCursor::pos().x()+width()>=QApplication::desktop()->availableGeometry().width()&&QCursor::pos().y()+height()>= QApplication::desktop()->availableGeometry().height()){
+
+         setGeometry(QCursor::pos().x()-width(),QCursor::pos().y()-height(),width(),height());
+
+    }
+
+    else if(QCursor::pos().x()+width()>=QApplication::desktop()->availableGeometry().width())
+         setGeometry(QCursor::pos().x()-width(),QCursor::pos().y(),width(),height());
+
+    else
+        setGeometry(QCursor::pos().x(),QCursor::pos().y(),width(),height());
     QWidget::show();                // Отображаем виджет, который полностью прозрачен
 
     animation.start();              // И запускаем анимацию
-    timer->start(3000);             // А также стартуем таймер, который запустит скрытие уведомления через 3 секунды
+    timer->start(1000);             // А также стартуем таймер, который запустит скрытие уведомления через 3 секунды
 }
 
 void PopUp::hideAnimation()

@@ -19,14 +19,16 @@ MainWindow::MainWindow(QWidget *parent)
     scene=new MapScene(this);
     centerChanged=new QTimer(this);
     centerChanged->setInterval(1);
-    scene->setFocusOnTouch(true);
+    //scene->setFocusOnTouch(true);
+
     ui->verticalLayout->addWidget(graphicsView);
     graphicsView->setDragMode(QGraphicsView::ScrollHandDrag);
     graphicsView->setMouseTracking(true);
 
 
     popUp = new PopUp();
-
+    webView= new QWebEngineView();
+    ui->horizontalLayout_3->addWidget(webView);
     this->setFocus();
     sceneSize=512;
     graphicsView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -37,7 +39,7 @@ MainWindow::MainWindow(QWidget *parent)
     for(auto &el:check_tiles){
     el.resize(tilesInView);
     }
-
+    this->ui->menu_API->setTitle("2Gis");
 
     graphicsView->setScene(scene);
 
@@ -63,9 +65,24 @@ connect(scene,&MapScene::increaseZoom,this,&MainWindow::increaseZoomByDoubleClic
 connect(scene,&MapScene::signalTargetCoordinate,this,&MainWindow::slotTargetCoordinate);
 connect(scene,&MapScene::showPopUp,this,&MainWindow::showPopUp);
 connect(graphicsView,&MapView::changeZoomWheel,this,&MainWindow::changeZoomByWheel);
+//connect(graphicsView,&MapView::rubberBandChanged,[&](){qDebug()<<"RubberBandChanged"<<endl;});
 
 centerChanged->start();
-installEventFilter(this);
+graphicsView->installEventFilter(this);
+graphicsView->viewport()->installEventFilter(this);
+scene->installEventFilter(this);
+graphicsView->viewport()->setCursor(Qt::ArrowCursor);
+//this->ui->menuWindow->addAction(this->ui->dockWidget->toggleViewAction());
+//this->ui->dockWidget->toggleViewAction()->setText("&Layers");
+this->ui->menuMenu_Window->addAction(this->ui->dockWidget_3->toggleViewAction());
+this->ui->dockWidget_3->toggleViewAction()->setText("&Some Information");
+
+
+
+
+connect(ui->lineEdit_3, &QLineEdit::returnPressed, this, &MainWindow::slotEnter);
+    // Подключиаем сигнала клика по ссылке к обработчику
+    connect(webView, &QWebEngineView::urlChanged, this, &MainWindow::slotLinkClicked);
 
 }
 
@@ -207,6 +224,16 @@ double MainWindow::remain(double number, double divider)
               return 0;
        return quotient*divider + number;
     }
+}
+
+bool MainWindow::eventFilter(QObject *watched, QEvent *event)
+{
+    if(watched==scene&&event->type()==QEvent::GraphicsSceneMouseRelease){
+        qDebug()<<"I am dragging"<<endl;
+    graphicsView->viewport()->setCursor(Qt::ArrowCursor);
+    }
+
+    return QMainWindow::eventFilter(watched, event);
 }
 
 
@@ -390,9 +417,7 @@ else{*/
     tiles.push_back(new MapTile(QPixmap::fromImage(im.scaled(size,size,Qt::IgnoreAspectRatio),Qt::AutoColor)));
     scene->addItem(tiles.back());
     tiles.back()->setPos(QPointF(x*size+SceneX,y*size+SceneY));
-    if(tiles.size()>=16){
-        /*Remove previous layout*/
-    }
+
 
 }
 
@@ -495,7 +520,7 @@ void MainWindow::on_pushButton_2_clicked()
 void MainWindow::on_actionOpen_Streen_Map_triggered()
 {
     if(api!="https://tile.openstreetmap.org/"){
-
+    this->ui->menu_API->setTitle("Open Street Map");
     this->changeMapView(this->zoom,"osm",graphicsView->mapToScene(graphicsView->viewport()->rect().center()));
 
     }
@@ -505,7 +530,7 @@ void MainWindow::on_actionOpen_Streen_Map_triggered()
 void MainWindow::on_actionYandex_Map_triggered()
 {
     if(api!="https://vec02.maps.yandex.net/"){
-
+    this->ui->menu_API->setTitle("Yandex Map");
     this->changeMapView(this->zoom,"yandex",graphicsView->mapToScene(graphicsView->viewport()->rect().center()));
     }
 }
@@ -513,8 +538,10 @@ void MainWindow::on_actionYandex_Map_triggered()
 void MainWindow::on_action2Gis_triggered()
 {
     if(api!="https://tile2.maps.2gis.com/"){
-
+    this->ui->menu_API->setTitle("2Gis");
     this->changeMapView(this->zoom,"2gis",graphicsView->mapToScene(graphicsView->viewport()->rect().center()));
+
+
     }
 }
 
@@ -534,6 +561,8 @@ void MainWindow::showPopUp(QPointF clickPoint)
      map_lon=longitude(x,zoom,remain(clickPoint.x(),size));
      map_lat=latitude(y,zoom,remain(clickPoint.y(),size));
     }
+    QUrl url("https://www.openstreetmap.org/geocoder/search_osm_nominatim_reverse?lat="+QString::number(map_lat)+"&lon="+QString::number(map_lon)+"&zoom="+QString::number(this->zoom));
+   webView->load(url);
     popUp->setPopupText(QString::number(map_lat)+"    "+QString::number(map_lon));
      popUp->show();
 }
@@ -594,7 +623,18 @@ void MainWindow::slotTargetCoordinate(QPointF target)
 
 
 
+void MainWindow::slotEnter()
+{
+    // Загружаем страницу по заданном URL в поле lineEdit
+    webView->load(QUrl(ui->lineEdit_3->text()));
+}
 
+void MainWindow::slotLinkClicked(QUrl url)
+{
+    // При клике по ссылке помещаем адрес в поле lineEdit
+    ui->lineEdit_3->setText(url.toString());
+    webView->load(url);     // Загружаем страницу по этой ссылке
+}
 
 
 

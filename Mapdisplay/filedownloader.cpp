@@ -17,7 +17,7 @@ FileDownloader::FileDownloader(QUrl imageUrl,int x,int y, QObject *parent) :
 }
 
 FileDownloader::~FileDownloader() {
-    //qDebug()<<this->x<<" and "<<this->y<<" tile is deleted"<<endl;
+    //qDebug()<<this->x<<" and "<<this->y<<" tile is deleted from filedowloader"<<endl;
 }
 
 void FileDownloader::fileDownloaded(QNetworkReply* pReply) {
@@ -27,8 +27,11 @@ void FileDownloader::fileDownloaded(QNetworkReply* pReply) {
  //emit a signal
  pReply->deleteLater();
  emit downloaded(this->x,this->y);
+ this->deleteLater();
+
 }
 
 QByteArray FileDownloader::downloadedData() const {
  return m_DownloadedData;
+
 }

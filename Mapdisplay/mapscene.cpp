@@ -19,8 +19,9 @@ void MapScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 
 void MapScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
+    if(event->buttons()==Qt::RightButton)
     emit showPopUp(event->scenePos());
-    Q_UNUSED(event);
+
 }
 
 
@@ -30,6 +31,9 @@ void MapScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 MapView::MapView(QWidget *parent):QGraphicsView()
 {
     //this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    viewport()->setCursor(Qt::CrossCursor);
+
+
 }
 
 void MapView::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
@@ -37,6 +41,8 @@ void MapView::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
     emit increaseZoom(event->scenePos());
     qDebug()<<"Mapview double click"<<endl;
 }
+
+
 
 void MapView::wheelEvent(QWheelEvent *event)
 {
