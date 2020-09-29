@@ -35,6 +35,7 @@ PopUp::PopUp(QWidget *parent) : QWidget(parent)
     // По сигналу таймера будет произведено скрытие уведомления, если оно видимо
     timer = new QTimer();
     connect(timer, &QTimer::timeout, this, &PopUp::hideAnimation);
+    hide();
 }
 
 void PopUp::paintEvent(QPaintEvent *event)
@@ -68,7 +69,7 @@ void PopUp::setPopupText(const QString &text)
     adjustSize();           // С пересчётом размеров уведомления
 }
 
-void PopUp::show()
+void PopUp::show(QPointF showPoint)
 {
     setWindowOpacity(0.0);  // Устанавливаем прозрачность в ноль
 
@@ -82,7 +83,7 @@ void PopUp::show()
                100);*/
     //setFixedHeight(100);
     setFixedSize(width(),height());
-    if(QCursor::pos().x()+width()>=QApplication::desktop()->availableGeometry().width()&&QCursor::pos().y()+height()>= QApplication::desktop()->availableGeometry().height()){
+    /*if(QCursor::pos().x()+width()>=QApplication::desktop()->availableGeometry().width()&&QCursor::pos().y()+height()>= QApplication::desktop()->availableGeometry().height()){
 
          setGeometry(QCursor::pos().x()-width(),QCursor::pos().y()-height(),width(),height());
 
@@ -92,7 +93,9 @@ void PopUp::show()
          setGeometry(QCursor::pos().x()-width(),QCursor::pos().y(),width(),height());
 
     else
-        setGeometry(QCursor::pos().x(),QCursor::pos().y(),width(),height());
+        setGeometry(QCursor::pos().x(),QCursor::pos().y(),width(),height());*/
+
+    setGeometry(showPoint.x(),showPoint.y(),width(),height());
     QWidget::show();                // Отображаем виджет, который полностью прозрачен
 
     animation.start();              // И запускаем анимацию

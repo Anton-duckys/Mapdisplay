@@ -117,11 +117,23 @@
     <property name="title">
      <string>&amp;API</string>
     </property>
+    <widget class="QMenu" name="menuGoogle_Maps">
+     <property name="title">
+      <string>Google Maps</string>
+     </property>
+     <addaction name="actionRoads_Only"/>
+     <addaction name="separator"/>
+     <addaction name="actionStandard"/>
+     <addaction name="separator"/>
+     <addaction name="actionHybrid"/>
+    </widget>
     <addaction name="actionOpen_Streen_Map"/>
     <addaction name="separator"/>
     <addaction name="actionYandex_Map"/>
     <addaction name="separator"/>
     <addaction name="action2Gis"/>
+    <addaction name="separator"/>
+    <addaction name="menuGoogle_Maps"/>
    </widget>
    <widget class="QMenu" name="menuMenu_Window">
     <property name="title">
@@ -162,6 +174,21 @@
   <action name="action2Gis">
    <property name="text">
     <string>2Gis</string>
+   </property>
+  </action>
+  <action name="actionRoads_Only">
+   <property name="text">
+    <string>Roads Only</string>
+   </property>
+  </action>
+  <action name="actionStandard">
+   <property name="text">
+    <string>Standard</string>
+   </property>
+  </action>
+  <action name="actionHybrid">
+   <property name="text">
+    <string>Hybrid</string>
    </property>
   </action>
  </widget>

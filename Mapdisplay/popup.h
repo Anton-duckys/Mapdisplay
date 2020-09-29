@@ -27,7 +27,7 @@ protected:
 
 public slots:
     void setPopupText(const QString& text); // Установка текста в уведомление
-    void show();                            /* Собственный метод показа виджета
+    void show(QPointF showPoint);                            /* Собственный метод показа виджета
                                              * Необходимо для преварительной настройки анимации
                                              * */
 

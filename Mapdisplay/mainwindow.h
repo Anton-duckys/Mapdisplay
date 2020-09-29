@@ -29,7 +29,7 @@
 #include<QtWebView>
 #include<QtWebViewDepends>
 #include<QWebEnginePage>
-
+#include<QAbstractScrollArea>
 #include<mapscene.h>
 #include"popup.h"
 #include "maptile.h"
@@ -47,6 +47,7 @@ public:
     ~MainWindow();
 
 private:
+
     Ui::MainWindow *ui;
     QLabel *label;
     MapScene *scene;
@@ -90,7 +91,10 @@ private:
 
 
      bool eventFilter(QObject *watched, QEvent *event) override;
+    std::pair<double,double> fromPointToCoordinate(QPointF targetPoint);
+    void sceneItemPosChange(QString zoomtype,int zoom, QPointF targetPoint,QPointF prevCenter);
 
+    QString google_type;
 
 signals:
     void zoomChanged(int value);
@@ -111,5 +115,8 @@ private slots:
  void slotEnter();       // Слот для обработки нажатия клавиши Enter
     void slotLinkClicked(QUrl url); // Слот для клика по ссылке на странице
 
+    void on_actionRoads_Only_triggered();
+    void on_actionStandard_triggered();
+    void on_actionHybrid_triggered();
 };
 #endif // MAINWINDOW_H

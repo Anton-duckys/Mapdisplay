@@ -21,11 +21,15 @@ public:
 
 
 
+
+
+
 signals:
 
     void increaseZoom(QPointF clickPoint);
     void signalTargetCoordinate(QPointF point);
      void showPopUp(QPointF click);
+private slots:
 
 
 };

@@ -24,9 +24,21 @@ MainWindow::MainWindow(QWidget *parent)
     ui->verticalLayout->addWidget(graphicsView);
     graphicsView->setDragMode(QGraphicsView::ScrollHandDrag);
     graphicsView->setMouseTracking(true);
+    /*
+     QHBoxLayout *layout=new QHBoxLayout();
+    QMessageBox*msg=new QMessageBox();
+    layout->addWidget(msg,Qt::AlignCenter);
+    graphicsView->setLayout(layout);
+*/
+     QMessageBox*msg=new QMessageBox();
 
 
     popUp = new PopUp();
+
+    QGraphicsProxyWidget *scene_pop=scene->addWidget(popUp);
+
+    scene_pop->setZValue(1);
+
     webView= new QWebEngineView();
     ui->horizontalLayout_3->addWidget(webView);
     this->setFocus();
@@ -35,9 +47,9 @@ MainWindow::MainWindow(QWidget *parent)
     graphicsView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     tilesInView=9;
     load_tem=false;
-    check_tiles.resize(tilesInView);
+    check_tiles.resize(tilesInView+3);
     for(auto &el:check_tiles){
-    el.resize(tilesInView);
+    el.resize(tilesInView+3);
     }
     this->ui->menu_API->setTitle("2Gis");
 
@@ -48,11 +60,11 @@ MainWindow::MainWindow(QWidget *parent)
 
 
     //graphicsView->setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
-    graphicsView->centerOn(size,size);
+
    zoom=4;
    tilesamount=pow(2,zoom);
    size=256;
-
+graphicsView->centerOn(size,size);
    SceneX=-(tilesamount*size-sceneSize)/2;
    SceneY=-(tilesamount*size-sceneSize)/2;
    graphicsView->setSceneRect( SceneX-sceneSize,SceneY-sceneSize,tilesamount*size+2*sceneSize,tilesamount*size+2*sceneSize);
@@ -97,7 +109,7 @@ Also this function calculate focus point  according to view's center with previo
 */
 void MainWindow::changeMapView(int zoom, QString zoomtype, QPointF viewTopCenter)
 {
-
+qDebug()<<viewTopCenter<<endl;
      QPointF prevCenter(graphicsView->mapToScene(graphicsView->viewport()->rect().center()));
 
      tilesamount=pow(2,this->zoom);
@@ -107,10 +119,16 @@ void MainWindow::changeMapView(int zoom, QString zoomtype, QPointF viewTopCenter
 
 
 
-   graphicsView->setSceneRect( SceneX-sceneSize,SceneY-sceneSize,tilesamount*size+2*sceneSize,tilesamount*size+2*sceneSize);
-          qDebug()<<QPointF(scene->width(),scene->height())<<endl;
+
+
+
+graphicsView->setSceneRect( SceneX-sceneSize,SceneY-sceneSize,tilesamount*size+2*sceneSize,tilesamount*size+2*sceneSize);
+          sceneItemPosChange(zoomtype,zoom,popUp->pos(),prevCenter);
      if(zoomtype=="increase"){
          graphicsView->centerOn(size+2*(viewTopCenter.x()-size),size+2*(viewTopCenter.y()-size));
+
+
+
      }
 
      else if(zoomtype=="decrease")
@@ -137,8 +155,9 @@ void MainWindow::changeMapView(int zoom, QString zoomtype, QPointF viewTopCenter
 
      }
 
-     else if(zoomtype=="osm"){
 
+
+     else {
          if(api=="https://vec02.maps.yandex.net/"){
              int x=(viewTopCenter.x()- remain(viewTopCenter.x(),size)-SceneX)/size;
              int y=(viewTopCenter.y()- remain(viewTopCenter.y(),size)-SceneY)/size;
@@ -152,26 +171,17 @@ void MainWindow::changeMapView(int zoom, QString zoomtype, QPointF viewTopCenter
              graphicsView->centerOn(SceneX+ (new_x)*256+tileX(lon,this->zoom).second+2,SceneY+(new_y)*256+tileY(lat,this->zoom).second+2);
 
          }
-         api="https://tile.openstreetmap.org/";
 
-     }
+         if(zoomtype=="osm")
+             api="https://tile.openstreetmap.org/";
 
-     else if(zoomtype=="2gis"){
+         else if(zoomtype=="2gis")
+             api="https://tile2.maps.2gis.com/";
 
-        if(api=="https://vec02.maps.yandex.net/"){
-            int x=(viewTopCenter.x()- remain(viewTopCenter.x(),size)-SceneX)/size;
-            int y=(viewTopCenter.y()- remain(viewTopCenter.y(),size)-SceneY)/size;
-
-            double lon=TwoGis_longitude(x,this->zoom,remain(viewTopCenter.x(),size));
-            double lat=TwoGis_latitude(y,this->zoom,remain(viewTopCenter.y(),size));
-
-            int new_x=tileX(lon,this->zoom).first;
-            int new_y=tileY(lat,this->zoom).first;
-
-            graphicsView->centerOn(SceneX+ (new_x)*256+tileX(lon,this->zoom).second+2,SceneY+(new_y)*256+tileY(lat,this->zoom).second+2);
-
-        }
-         api="https://tile2.maps.2gis.com/";
+         else if(zoomtype=="google_r"||zoomtype=="google_s"||zoomtype=="google_y"){
+             api=" https://mt.google.com/";
+             google_type=zoomtype.mid(7,1);
+         }
 
      }
 
@@ -179,10 +189,10 @@ void MainWindow::changeMapView(int zoom, QString zoomtype, QPointF viewTopCenter
         el.clear();
      }
 
-     check_tiles.resize(tilesInView);
+     check_tiles.resize(tilesInView+3);
 
      for(auto &el:check_tiles){
-        el.resize(tilesInView);
+        el.resize(tilesInView+3);
      }
 
         load_tem=true;
@@ -234,6 +244,59 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event)
     }
 
     return QMainWindow::eventFilter(watched, event);
+}
+
+std::pair<double, double> MainWindow::fromPointToCoordinate(QPointF targetPoint)
+{
+    double lon_x=targetPoint.x()- remain(targetPoint.x(),size);
+    double lat_y=targetPoint.y()- remain(targetPoint.y(),size);
+
+    int lon_k=(lon_x-SceneX)/size;
+    int lat_l=(lat_y-SceneY)/size;
+    double map_lon;
+    double map_lat;
+    if(this->api=="https://vec02.maps.yandex.net/")
+    {
+        map_lon=TwoGis_longitude(lon_k,zoom,remain(targetPoint.x(),size));
+         map_lat=TwoGis_latitude(lat_l,zoom,remain(targetPoint.y(),size));
+
+    }
+    else{
+     map_lon=longitude(lon_k,zoom,remain(targetPoint.x(),size));
+     map_lat=latitude(lat_l,zoom,remain(targetPoint.y(),size));
+    }
+
+    return std::make_pair(map_lat,map_lon);
+}
+
+void MainWindow::sceneItemPosChange(QString zoomtype, int zoom, QPointF targetPoint, QPointF prevCenter)
+{
+
+if(popUp->isVisible()){
+
+if(zoomtype=="increase"||zoomtype=="decrease"){
+
+    int x=(targetPoint.x()- remain(targetPoint.x(),size)+(pow(2,zoom)*size- sceneSize)/2)/size;
+    int y=(targetPoint.y()- remain(targetPoint.y(),size)+(pow(2,zoom)*size- sceneSize)/2)/size;
+
+    double lon=longitude(x,zoom,remain(targetPoint.x(),size));
+    double lat=latitude(y,zoom,remain(targetPoint.y(),size));
+
+    int new_x=tileX(lon,this->zoom).first;
+    int new_y=tileY(lat,this->zoom).first;
+
+    //graphicsView->centerOn(SceneX+ (new_x)*256+tileX(lon,this->zoom).second,SceneY+(new_y)*256+tileY(lat,this->zoom).second);
+
+    popUp->setGeometry(SceneX+ (new_x)*256+tileX(lon,this->zoom).second,SceneY+(new_y)*256+tileY(lat,this->zoom).second,popUp->width(),popUp->height());
+}
+
+
+
+}
+
+
+
+
 }
 
 
@@ -369,13 +432,13 @@ if(issetted){
      QPointF firstTopLeft(graphicsView->mapToScene(graphicsView->viewport()->rect().topLeft()));
      QPointF firstBottomRight(graphicsView->mapToScene(graphicsView->viewport()->rect().bottomRight()));
      foreach (QGraphicsItem* item,scene->items()) {
-        if(!intersected(firstTopLeft,firstBottomRight,QPointF(item->x(),item->y()),QPointF(item->x()+size,item->y()+size))){
+        if(item->zValue()==0&&!intersected(firstTopLeft,firstBottomRight,QPointF(item->x(),item->y()),QPointF(item->x()+size,item->y()+size))){
 
         scene->removeItem(item);
         int i=(item->x()-SceneX)/size;
         int j=(item->y()-SceneY)/size;
 
-        check_tiles[i%tilesInView][j%tilesInView]=false;
+        check_tiles[i%(tilesInView+3)][j%(tilesInView+3)]=false;
         auto iter =std::find_if(tiles.begin(),tiles.end(),[&](MapTile*tile){return tile->x()==item->x()&&tile->y()==item->y();});
         tiles.erase(iter);
         }
@@ -387,34 +450,11 @@ if(issetted){
 
 void MainWindow::loadImage(int x, int y)
 {
-    /*if(issetted==false){
-        if(load_tem){
-        QImage im;
-        im.loadFromData(static_cast<FileDownloader*>(sender())->downloadedData());
-        //temp_tiles.push_back(new MapTile(QPixmap::fromImage(im.scaled(size,size,Qt::IgnoreAspectRatio),Qt::AutoColor)));
-        temp_tiles.push_back(new MapTile(QPixmap::fromImage(im.scaled(size,size,Qt::IgnoreAspectRatio),Qt::AutoColor)));
-        scene->addItem(temp_tiles.back());
-        temp_tiles.back()->setPos(QPointF(x*size+SceneX,y*size+SceneY));
-        if(temp_tiles.size()>=16){
-            for(auto &el:tiles){
-                delete el;
-            }
-            tiles.clear();
-            for(auto &el:temp_tiles){
-                tiles.push_back(el);
-            }
-            temp_tiles.clear();
-            issetted=true;
-            load_tem=false;
-        }
 
-    }
-    }
-else{*/
     QImage im;
     im.loadFromData(static_cast<FileDownloader*>(sender())->downloadedData());
-    //temp_tiles.push_back(new MapTile(QPixmap::fromImage(im.scaled(size,size,Qt::IgnoreAspectRatio),Qt::AutoColor)));
     tiles.push_back(new MapTile(QPixmap::fromImage(im.scaled(size,size,Qt::IgnoreAspectRatio),Qt::AutoColor)));
+    tiles.back()->setZValue(0);
     scene->addItem(tiles.back());
     tiles.back()->setPos(QPointF(x*size+SceneX,y*size+SceneY));
 
@@ -463,13 +503,13 @@ void MainWindow::showCenter()
          map_lat=latitude(lat_l,zoom,remain(viewCenter.y(),size));
         }
 
-        for(int i=k;i<k+tilesInView&&i<tilesamount;++i){
-            for(int j=l;j<l+tilesInView&&j<tilesamount;++j){
+        for(int i=k-3;i<k+tilesInView&&i<tilesamount;++i){
+            for(int j=l-3;j<l+tilesInView&&j<tilesamount;++j){
 
                 if(i>=0&&j>=0&& intersected(viewTopLeft,viewBottomRight,QPointF(SceneX+i*size,SceneY+j*size),QPointF(SceneX+i*size+size,SceneY+j*size+size)))
                  {
 
-                    if(!check_tiles[i%tilesInView][j%tilesInView]){
+                    if(!check_tiles[i%(tilesInView+3)][j%(tilesInView+3)]){
 
 
                          if(api=="https://tile.openstreetmap.org/")
@@ -481,7 +521,10 @@ void MainWindow::showCenter()
                          else if(api=="https://tile2.maps.2gis.com/")
                             urlpai.setUrl("http://tile2.maps.2gis.com/tiles?x="+QString::number(i)+"&y="+QString::number(j)+"&z="+QString::number(zoom)+"&v=1&ts=online_sd");
 
-                         check_tiles[i%tilesInView][j%tilesInView]=true;
+                         else if(api==" https://mt.google.com/")
+                            urlpai.setUrl("https://mt.google.com/vt/lyrs="+google_type+"&x="+QString::number(i)+"&y="+QString::number(j)+"&z="+QString::number(zoom));
+
+                         check_tiles[i%(tilesInView+3)][j%(tilesInView+3)]=true;
                          connect(new FileDownloader(urlpai,i,j, this),&FileDownloader::downloaded,this,&MainWindow::loadImage);
 
 
@@ -545,6 +588,41 @@ void MainWindow::on_action2Gis_triggered()
     }
 }
 
+
+
+void MainWindow::on_actionRoads_Only_triggered()
+{
+    if(api!=" https://mt.google.com/"||google_type!="google_r"){
+    this->ui->menu_API->setTitle("Goggle Map: Roads Only");
+    this->changeMapView(this->zoom,"google_r",graphicsView->mapToScene(graphicsView->viewport()->rect().center()));
+
+
+    }
+}
+
+void MainWindow::on_actionStandard_triggered()
+{
+    if(api!=" https://mt.google.com/"||google_type!="google_s"){
+    this->ui->menu_API->setTitle("Goggle Map: Standard");
+    this->changeMapView(this->zoom,"google_s",graphicsView->mapToScene(graphicsView->viewport()->rect().center()));
+
+
+    }
+}
+
+void MainWindow::on_actionHybrid_triggered()
+{
+    if(api!=" https://mt.google.com/"||google_type!="google_y"){
+    this->ui->menu_API->setTitle("Goggle Map: Hybrid");
+    this->changeMapView(this->zoom,"google_y",graphicsView->mapToScene(graphicsView->viewport()->rect().center()));
+
+
+    }
+}
+
+
+
+
 void MainWindow::showPopUp(QPointF clickPoint)
 {
     int x=(clickPoint.x()- remain(clickPoint.x(),size)-SceneX)/size;
@@ -564,7 +642,8 @@ void MainWindow::showPopUp(QPointF clickPoint)
     QUrl url("https://www.openstreetmap.org/geocoder/search_osm_nominatim_reverse?lat="+QString::number(map_lat)+"&lon="+QString::number(map_lon)+"&zoom="+QString::number(this->zoom));
    webView->load(url);
     popUp->setPopupText(QString::number(map_lat)+"    "+QString::number(map_lon));
-     popUp->show();
+    //popUp->setGeometry()
+     popUp->show(clickPoint);
 }
 
 void MainWindow::increaseZoomByDoubleClick(QPointF clickPoint)
@@ -635,6 +714,7 @@ void MainWindow::slotLinkClicked(QUrl url)
     ui->lineEdit_3->setText(url.toString());
     webView->load(url);     // Загружаем страницу по этой ссылке
 }
+
 
 
 

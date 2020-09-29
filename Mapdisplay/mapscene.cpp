@@ -21,6 +21,7 @@ void MapScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
     if(event->buttons()==Qt::RightButton)
     emit showPopUp(event->scenePos());
+    qDebug()<<"pop "<<event->scenePos()<<endl;
 
 }
 
