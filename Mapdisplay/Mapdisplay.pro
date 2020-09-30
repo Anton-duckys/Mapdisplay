@@ -14,14 +14,16 @@ SOURCES += \
     mainwindow.cpp \
     mapscene.cpp \
     maptile.cpp \
-    popup.cpp
+    popup.cpp \
+    scroller.cpp
 
 HEADERS += \
     filedownloader.h \
     mainwindow.h \
     mapscene.h \
     maptile.h \
-    popup.h
+    popup.h \
+    scroller.h
 
 FORMS += \
     mainwindow.ui

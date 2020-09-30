@@ -22,7 +22,7 @@ MainWindow::MainWindow(QWidget *parent)
     //scene->setFocusOnTouch(true);
 
     ui->verticalLayout->addWidget(graphicsView);
-    graphicsView->setDragMode(QGraphicsView::ScrollHandDrag);
+   // graphicsView->setDragMode(QGraphicsView::ScrollHandDrag);
     graphicsView->setMouseTracking(true);
     /*
      QHBoxLayout *layout=new QHBoxLayout();
@@ -31,7 +31,9 @@ MainWindow::MainWindow(QWidget *parent)
     graphicsView->setLayout(layout);
 */
      QMessageBox*msg=new QMessageBox();
-
+screenshotLabel=new QLabel();
+screenshotLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+ui->horizontalLayout->addWidget(screenshotLabel);
 
     popUp = new PopUp();
 
@@ -45,6 +47,7 @@ MainWindow::MainWindow(QWidget *parent)
     sceneSize=512;
     graphicsView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     graphicsView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    graphicsView->setDragMode(QGraphicsView::ScrollHandDrag);
     tilesInView=9;
     load_tem=false;
     check_tiles.resize(tilesInView+3);
@@ -69,14 +72,17 @@ graphicsView->centerOn(size,size);
    SceneY=-(tilesamount*size-sceneSize)/2;
    graphicsView->setSceneRect( SceneX-sceneSize,SceneY-sceneSize,tilesamount*size+2*sceneSize,tilesamount*size+2*sceneSize);
     //graphicsView->setSceneRect( SceneX,SceneY,tilesamount*size,tilesamount*size);
+   //graphicsView->setDragMode(QGraphicsView::NoDrag);
 
-
+   m_scroller=new scroller(graphicsView);
 
 connect(centerChanged,&QTimer::timeout,this,&MainWindow::showCenter);
 connect(scene,&MapScene::increaseZoom,this,&MainWindow::increaseZoomByDoubleClick);
 connect(scene,&MapScene::signalTargetCoordinate,this,&MainWindow::slotTargetCoordinate);
 connect(scene,&MapScene::showPopUp,this,&MainWindow::showPopUp);
 connect(graphicsView,&MapView::changeZoomWheel,this,&MainWindow::changeZoomByWheel);
+connect(scene,&MapScene::mouse_Pressed,this,&MainWindow::startScroll);
+connect(scene,&MapScene::mouse_Released,this,&MainWindow::endScroll);
 //connect(graphicsView,&MapView::rubberBandChanged,[&](){qDebug()<<"RubberBandChanged"<<endl;});
 
 centerChanged->start();
@@ -92,7 +98,7 @@ this->ui->dockWidget_3->toggleViewAction()->setText("&Some Information");
 
 
 
-connect(ui->lineEdit_3, &QLineEdit::returnPressed, this, &MainWindow::slotEnter);
+
     // Подключиаем сигнала клика по ссылке к обработчику
     connect(webView, &QWebEngineView::urlChanged, this, &MainWindow::slotLinkClicked);
 
@@ -179,7 +185,7 @@ graphicsView->setSceneRect( SceneX-sceneSize,SceneY-sceneSize,tilesamount*size+2
              api="https://tile2.maps.2gis.com/";
 
          else if(zoomtype=="google_r"||zoomtype=="google_s"||zoomtype=="google_y"){
-             api=" https://mt.google.com/";
+             api="https://mt.google.com/";
              google_type=zoomtype.mid(7,1);
          }
 
@@ -238,10 +244,38 @@ double MainWindow::remain(double number, double divider)
 
 bool MainWindow::eventFilter(QObject *watched, QEvent *event)
 {
+
+    if(watched==scene&&event->type()==QMouseEvent::GraphicsSceneMousePress){
+         qDebug()<<"I am dragging"<<endl;
+        graphicsView->viewport()->setCursor(Qt::ArrowCursor);
+
+            if(scene->crop){
+                //m_currentImageItem=tiles.back();
+
+               //shootScreen();
+
+
+
+            }
+    }
+
+
+
     if(watched==scene&&event->type()==QEvent::GraphicsSceneMouseRelease){
         qDebug()<<"I am dragging"<<endl;
     graphicsView->viewport()->setCursor(Qt::ArrowCursor);
+
+        if(scene->crop){
+            //m_currentImageItem=tiles.back();
+
+
+
+        }
+
     }
+
+
+
 
     return QMainWindow::eventFilter(watched, event);
 }
@@ -296,6 +330,28 @@ if(zoomtype=="increase"||zoomtype=="decrease"){
 
 
 
+
+}
+
+void MainWindow::onClippedImage(const QPixmap &pixmap)
+{
+    label->setPixmap(pixmap);
+}
+
+void MainWindow::shootScreen()
+{
+    QScreen *screen = QGuiApplication::primaryScreen();
+    if (const QWindow *window = windowHandle())
+        screen = window->screen();
+    if (!screen)
+        return;
+
+
+
+    //originalPixmap = screen->grabWindow(QApplication::desktop( )->winId( ),screenshotTopLeft.x(),screenshotTopLeft.y(),screenshotButtomRight.x()-screenshotTopLeft.x(),screenshotButtomRight.y()-screenshotTopLeft.y());
+    screenshotLabel->setPixmap(originalPixmap.scaled(screenshotLabel->size(),
+                                                     Qt::KeepAspectRatio,
+                                                     Qt::SmoothTransformation));
 
 }
 
@@ -468,6 +524,9 @@ This function calculate which tiles have to be on view
 void MainWindow::showCenter()
 {
 
+
+        //qDebug()<< graphicsView->mapToScene( graphicsView->rubberBandRect().x(),graphicsView->rubberBandRect().y())<<endl;
+        selectionRect=graphicsView->rubberBandRect();
         QPointF viewTopLeft(graphicsView->mapToScene(graphicsView->viewport()->rect().topLeft()));
         QPointF viewBottomRight(graphicsView->mapToScene(graphicsView->viewport()->rect().bottomRight()));
         QPointF viewCenter(graphicsView->mapToScene(graphicsView->viewport()->rect().center()));
@@ -521,7 +580,7 @@ void MainWindow::showCenter()
                          else if(api=="https://tile2.maps.2gis.com/")
                             urlpai.setUrl("http://tile2.maps.2gis.com/tiles?x="+QString::number(i)+"&y="+QString::number(j)+"&z="+QString::number(zoom)+"&v=1&ts=online_sd");
 
-                         else if(api==" https://mt.google.com/")
+                         else if(api=="https://mt.google.com/")
                             urlpai.setUrl("https://mt.google.com/vt/lyrs="+google_type+"&x="+QString::number(i)+"&y="+QString::number(j)+"&z="+QString::number(zoom));
 
                          check_tiles[i%(tilesInView+3)][j%(tilesInView+3)]=true;
@@ -592,7 +651,7 @@ void MainWindow::on_action2Gis_triggered()
 
 void MainWindow::on_actionRoads_Only_triggered()
 {
-    if(api!=" https://mt.google.com/"||google_type!="google_r"){
+    if(api!="https://mt.google.com/"||google_type!="r"){
     this->ui->menu_API->setTitle("Goggle Map: Roads Only");
     this->changeMapView(this->zoom,"google_r",graphicsView->mapToScene(graphicsView->viewport()->rect().center()));
 
@@ -602,7 +661,7 @@ void MainWindow::on_actionRoads_Only_triggered()
 
 void MainWindow::on_actionStandard_triggered()
 {
-    if(api!=" https://mt.google.com/"||google_type!="google_s"){
+    if(api!="https://mt.google.com/"||google_type!="s"){
     this->ui->menu_API->setTitle("Goggle Map: Standard");
     this->changeMapView(this->zoom,"google_s",graphicsView->mapToScene(graphicsView->viewport()->rect().center()));
 
@@ -612,7 +671,7 @@ void MainWindow::on_actionStandard_triggered()
 
 void MainWindow::on_actionHybrid_triggered()
 {
-    if(api!=" https://mt.google.com/"||google_type!="google_y"){
+    if(api!="https://mt.google.com/"||google_type!="y"){
     this->ui->menu_API->setTitle("Goggle Map: Hybrid");
     this->changeMapView(this->zoom,"google_y",graphicsView->mapToScene(graphicsView->viewport()->rect().center()));
 
@@ -639,12 +698,34 @@ void MainWindow::showPopUp(QPointF clickPoint)
      map_lon=longitude(x,zoom,remain(clickPoint.x(),size));
      map_lat=latitude(y,zoom,remain(clickPoint.y(),size));
     }
-    QUrl url("https://www.openstreetmap.org/geocoder/search_osm_nominatim_reverse?lat="+QString::number(map_lat)+"&lon="+QString::number(map_lon)+"&zoom="+QString::number(this->zoom));
-   webView->load(url);
+    QUrl osm_url("https://www.openstreetmap.org/geocoder/search_osm_nominatim_reverse?lat="+QString::number(map_lat)+"&lon="+QString::number(map_lon)+"&zoom="+QString::number(this->zoom));
+    QUrl google_url("https://maps.google.com/?q="+QString::number(map_lat)+","+QString::number(map_lon));
+
+    if(api=="https://tile.openstreetmap.org/")
+      webView->load(osm_url);
+    else if(api=="https://mt.google.com/")
+      webView->load(google_url);
+
+
     popUp->setPopupText(QString::number(map_lat)+"    "+QString::number(map_lon));
     //popUp->setGeometry()
-     popUp->show(clickPoint);
+    popUp->show(clickPoint);
 }
+
+void MainWindow::startScroll()
+{
+    m_scroller->resetScroll();
+      m_scroller->setMousePressed(true);
+      m_scroller->startScroll();
+      graphicsView->viewport()-> setCursor(Qt::ClosedHandCursor);
+}
+
+void MainWindow::endScroll()
+{
+    m_scroller->setMousePressed(false);
+}
+
+
 
 void MainWindow::increaseZoomByDoubleClick(QPointF clickPoint)
 {
@@ -702,19 +783,30 @@ void MainWindow::slotTargetCoordinate(QPointF target)
 
 
 
-void MainWindow::slotEnter()
-{
-    // Загружаем страницу по заданном URL в поле lineEdit
-    webView->load(QUrl(ui->lineEdit_3->text()));
-}
+
 
 void MainWindow::slotLinkClicked(QUrl url)
 {
-    // При клике по ссылке помещаем адрес в поле lineEdit
-    ui->lineEdit_3->setText(url.toString());
+
     webView->load(url);     // Загружаем страницу по этой ссылке
+
 }
 
 
 
 
+
+void MainWindow::on_actionCrop_triggered()
+{
+    if(graphicsView->dragMode()==QGraphicsView::ScrollHandDrag)
+    {
+        graphicsView->setDragMode(QGraphicsView::RubberBandDrag);
+        scene->crop=true;
+    }
+    else
+    {
+        graphicsView->setDragMode(QGraphicsView::ScrollHandDrag);
+        scene->crop=false;
+    }
+
+}

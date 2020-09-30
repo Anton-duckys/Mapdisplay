@@ -20,8 +20,17 @@ void MapScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 void MapScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
     if(event->buttons()==Qt::RightButton)
-    emit showPopUp(event->scenePos());
-    qDebug()<<"pop "<<event->scenePos()<<endl;
+       {emit showPopUp(event->scenePos());
+    }
+//if(event->buttons()==Qt::LeftButton)
+   // emit mouse_Pressed();
+
+
+}
+
+void MapScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
+{
+   // emit mouse_Released();
 
 }
 
@@ -37,11 +46,31 @@ MapView::MapView(QWidget *parent):QGraphicsView()
 
 }
 
-void MapView::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
+void MapView::mousePressEvent(QMouseEvent *event)
 {
-    emit increaseZoom(event->scenePos());
-    qDebug()<<"Mapview double click"<<endl;
+    qDebug()<<"xdfgdffgdgf"<<endl;
+    rubber=true;
+    screenshotTopLeft = event->pos();
+        if (!rubberBand)
+            rubberBand = new QRubberBand(QRubberBand::Rectangle, this);
+        rubberBand->setGeometry(QRect(screenshotTopLeft, QSize()));
+        rubberBand->show();
 }
+
+void MapView::mouseMoveEvent(QMouseEvent *event)
+{if(rubber)
+rubberBand->setGeometry(QRect( screenshotTopLeft, event->pos()).normalized());
+}
+
+void MapView::mouseReleaseEvent(QMouseEvent *event)
+{
+    rubber=false;
+rubberBand->hide();
+}
+
+
+
+
 
 
 

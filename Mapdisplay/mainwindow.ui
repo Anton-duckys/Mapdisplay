@@ -83,9 +83,6 @@
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="lineEdit_3"/>
-        </item>
-        <item>
          <spacer name="horizontalSpacer_2">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -140,8 +137,15 @@
      <string>Menu Window</string>
     </property>
    </widget>
+   <widget class="QMenu" name="menuTools">
+    <property name="title">
+     <string>Tools</string>
+    </property>
+    <addaction name="actionCrop"/>
+   </widget>
    <addaction name="menu_API"/>
    <addaction name="menuMenu_Window"/>
+   <addaction name="menuTools"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QDockWidget" name="dockWidget_3">
@@ -189,6 +193,20 @@
   <action name="actionHybrid">
    <property name="text">
     <string>Hybrid</string>
+   </property>
+  </action>
+  <action name="actionCrop">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Crop</string>
    </property>
   </action>
  </widget>
