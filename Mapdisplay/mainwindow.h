@@ -30,10 +30,12 @@
 #include<QtWebViewDepends>
 #include<QWebEnginePage>
 #include<QAbstractScrollArea>
+#include<QScreen>
 #include<mapscene.h>
 #include"popup.h"
 #include "maptile.h"
 #include "filedownloader.h"
+#include "scroller.h"
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -70,6 +72,10 @@ private:
     QUrl urlpai; 
     QVector<QVector<bool>> check_tiles;
     QHBoxLayout*layout;
+
+    QScroller*scroll;
+
+    int zetlevel=0;
     double longitude (int x,int z, double picX);
     double latitude(int y,int z,double picY);
 
@@ -90,12 +96,26 @@ private:
     PopUp *popUp;
 
 
-     bool eventFilter(QObject *watched, QEvent *event) override;
+     bool eventFilter(QObject *watched, QEvent *event);
     std::pair<double,double> fromPointToCoordinate(QPointF targetPoint);
     void sceneItemPosChange(QString zoomtype,int zoom, QPointF targetPoint,QPointF prevCenter);
 
     QString google_type;
 
+
+
+    scroller* m_scroller;
+
+    void onClippedImage(const QPixmap& pixmap);
+QRect selectionRect;
+    QGraphicsPixmapItem* m_currentImageItem {nullptr};
+    QPixmap originalPixmap;
+    QLabel *screenshotLabel;
+
+
+
+
+void shootScreen();
 signals:
     void zoomChanged(int value);
 
@@ -111,12 +131,15 @@ private slots:
  void slotTargetCoordinate(QPointF target);
  void on_action2Gis_triggered();
  void showPopUp(QPointF clickPoint);
+ void startScroll();
+ void endScroll();
 
- void slotEnter();       // Слот для обработки нажатия клавиши Enter
+        // Слот для обработки нажатия клавиши Enter
     void slotLinkClicked(QUrl url); // Слот для клика по ссылке на странице
 
     void on_actionRoads_Only_triggered();
     void on_actionStandard_triggered();
     void on_actionHybrid_triggered();
+    void on_actionCrop_triggered();
 };
 #endif // MAINWINDOW_H
